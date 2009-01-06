@@ -1,0 +1,13 @@
+var db_schema = new Array();
+
+db_schema[0] = 'CREATE TABLE IF NOT EXISTS online_track ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "type" varchar(32) DEFAULT NULL, "time" datetime DEFAULT NULL)';
+
+<% i = 1 %>
+<% @sql.each do |s| %>
+db_schema[<%= i %>] = '<%= s[0].gsub!('CREATE TABLE','CREATE TABLE IF NOT EXISTS')%>';
+<% i +=1 %>
+<% end %>
+
+
+
+

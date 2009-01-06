@@ -1,0 +1,13 @@
+/**
+ * @author marui
+ */
+
+var offline = new Array();
+
+
+	
+<% @offline_actions.each do |name, function| %>
+	offline['<%= name%>'] = function() { 
+		<%= function %>
+	}
+<% end %>
