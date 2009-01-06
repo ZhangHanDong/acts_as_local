@@ -10,4 +10,175 @@ Example
 Example goes here.
 
 
+Usage:
+
+This project plugs Google Gears in Ruby on Rails.
+
+Gears on Rails helps developers to write fully offline functionnal web applications based on Gears without learning a bit of Gears.
+
+Here we provide an demo to show what we have got and illustrate our ideas.
+
+In this page, I am going to show how to make an offline read-only application using GoR Plugin.
+
+In order to use this Plugin, Json should be installed on the system.
+
+     gem install json_pure
+
+We need Goolge Gears also installed on your system. You would be prompted to install Google Gears when you first time vist this web application if you havn't install it.
+
+Now I am playing as a Rails programmer, who wants to make an offline version web app but without how to do this in javascript and havn't heard of Google Gears.
+1. Setup a Rails project and Install Plugin
+
+     rails demo
+     ruby script/plugin install http://gearsonrails.googlecode.com/svn/trunk/acts_as_local/
+
+1.1 Config the database.yml properly
+2. Generate Controller and Edit View
+
+    script/generate controller say hello 
+
+In hello.html.erb in the View folder.
+
+     <html>
+          <head>
+          <%= javascript_include_tag 'prototype' %>
+          </head>
+          <body>
+          <h1>Online Status: <%= online_status_tag %> <BR> </h1>
+          <b>Gears Status: <%= gears_status_tag %></b>
+               <table>
+               <tr>
+                    <td>&lt;%= link_to_local "SaySomething", :update=>'result', :action=>'saysomething'%></td>
+               </tr>
+               <tr>
+                    <td>Rui says:</td>
+                    <td id="result"></td>
+               </tr>
+               </table>
+          </body>
+     </html>
+
+Notes: In order to use 'online_status_tag' and 'link_to_local' helpers, you must add <%= javascript_include_tag 'prototype' %> in <head>.
+
+You can add online_status_tag multiple times to the places you need. gears_status_tag is used to indicate the current offline app status.
+3. Edit Controller and add local controller
+
+In app/controller/say_controller.rb add
+
+     acts_as_local
+
+then add action 'saysomething'
+
+  def saysomething
+    render :text=>Time.now
+  end
+
+In app/controller, make subfolder 'local' and add file 'say_controller.json'
+
+Note that all offline actions in 'say' controller are stored in this file in valid json format as "action_name":"code"
+
+Add saysomething offline version in say_controller.json
+
+     {
+     "saysomething": "return ('blabla...');"	
+     }
+
+4. Done! Start Server
+
+visit: http://localhost:3000/say/hello
+
+The default offline view is the static page of each view. However, once you define the corresponding local action in json file, the offline response would be the return value of that local action. If you either don't want stale pages of your views or write javascript actions, you could simply write like this:
+
+     acts_as_local :except=>['hello']
+
+Visitors can't vist these excluded pages when they are offline.
+
+You can exclude more actions like
+
+     acts_as_local :except=>['hello','aaa','bbb']
+
+Not working?
+
+Change TARGET in vendor/plugins/acts_as_local/lib/gor/javascripts/data_switch.js to your host
+
+The following will show how to create an offline view of a message board application.
+Quick Start for Message Board
+
+Use the 4 easy steps to convert your web-application to an offline working web-application.
+Step 0 - Installation of GoR Plugin.
+
+Install GoR from Googlecode. Inorder to install GoR from google code run the following command :
+
+ruby script /plugin install http://gearsonrails.googlecode.com/svn/trunk/acts_as_local
+Step1 - Create offline actions by editing the controller
+
+After installing GoR edit the controller to create the offline actions. Make the following changes to the controller.
+1.1)
+
+add acts_as_local at the start of the controller.
+1.2)
+
+Define a new Local action in the controller. It is important to include the single inverted comma '. Add the following code to the controller.
+
+def new_local
+	'
+		 posts = Post.find_local("all");
+	'
+end
+
+1.3)
+
+Define create_local action. It is important to include the single inverted comma '. Add the following code to the controller.
+
+ def create_local
+	'
+        post = Post.build(params("post"));
+         Post.create_local(post);
+        window.location.reload( false );
+        '
+   end
+
+Step 2 - Debug Information
+
+Edit view to create offline view.
+
+Add debug info to online view
+
+<p><b> Debug info: Online: <%= online_status_tag %> 
+ Gears: <%= gears_status_tag%> </b></p>
+
+Create a new html.erb file and copy the contents from the online view as it is to make the offline template.
+Step 3.Edit View to create offline view.
+
+After offline view is created replace following Ruby functional part
+
+<% for post in @posts %>
+    <tr>
+      <td><%=h post.title %></td>
+      <td><%=h post.body %></td>
+    </tr>
+  <% end %>
+
+by
+
+ <%= local '
+   var posts;
+ posts.each(function(post) {
+ puts "<tr>"
+ puts "<td>"+post.title+"</td>"
+ puts "<td>"+post.body+"</td>"
+ puts "</tr>"
+ });
+' %>
+
+At the end replace
+
+<form action="/posts/new" onSubmit="alert(Form.serialize(this));" class="new_post" id="new_post" >
+
+by
+
+<% form_local_for('post',:action=>'create') do |f| %>
+
+
+
 Copyright (c) 2008 [name of plugin creator], released under the MIT license
