@@ -32,7 +32,7 @@ Now I am playing as a Rails programmer, who wants to make an offline version web
      rails demo
      ruby script/plugin install http://gearsonrails.googlecode.com/svn/trunk/acts_as_local/
 or
-    git clone git://github.com/ZhangHanDong/acts_as_local.git (in vendor/plugin)
+    ruby script/plugin install git://github.com/ZhangHanDong/acts_as_local.git
     
 1.1 Config the database.yml properly
 2. Generate Controller and Edit View
